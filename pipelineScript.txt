@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+    
+    
+    
+    environment {
+       registry = " public.ecr.aws/f0s4k0d6/docker " 
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scmGit(branches: [[name: '*/new']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/Suprajaa04/repo1.git']])
+            }
+        }
+        
+        
+        stage('Build image') {
+            steps {
+                script {
+                   'docker build -t docker:latest' 
+                }
+                
+            }
+        }
+        stage('Tag and Push to ECR') {
+            steps {
+                script {
+                    sh "aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/f0s4k0d6"
+                    sh "docker tag repo1:latest public.ecr.aws/f0s4k0d6/repo1:latest"
+                    sh "docker push public.ecr.aws/f0s4k0d6/repo1:latest"
+
+                }
+            }
+        }
+        stage( 'Deploy to K8S'){
+            steps{
+                withKubeConfig(caCertificate: '', clusterName: '', contextName: '', credentialsId: 'K8S', namespace: '', restrictKubeConfigAccess: false, serverUrl: 'https://7C584154812B9395574883BCDD79B2B4.gr7.us-east-1.eks.amazonaws.com') {
+                  sh"aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/f0s4k0d6"
+                  sh "kubectl apply -f deployment.yml"
+            
+                    
+                }
+            }
+        }
+        
+    }
+        
+}
