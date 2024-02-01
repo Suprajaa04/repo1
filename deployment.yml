@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-1
+  labels:
+    app: jenkins
+
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      name: pod01
+      labels:
+        app: jenkins
+    spec:
+      containers:
+      - name: container
+        image: public.ecr.aws/f0s4k0d6/repo1:latest
+        ports:
+        - containerPort: 80
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: mysvc
+    labels:
+      app: jenkins
+
+spec:
+ selector:
+   app: jenkins
+
+ type: LoadBalancer
+ ports:
+    - port: 80
+      targetPort: 80
