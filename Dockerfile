@@ -1,7 +1,8 @@
-FROM httpd:latest
-ADD index.html /usr/local/apache2/conf/httpd.conf
+FROM ubuntu:latest
+RUN apt-get update && apt-get install apache2 -y
+ADD index.html /var/www/html
 EXPOSE 80
-CMD ["httpd", "-D", "FOREGROUND"]
+CMD ["apache2ctl", "-D", "FOREGROUND"]
 
 
 
